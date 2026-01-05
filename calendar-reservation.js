@@ -84,7 +84,7 @@ function Submission(row) {
   var startTime = aSheet.getRange(row, 5).getValue();
   this.startTimestamp = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate(), startTime.getHours(), startTime.getMinutes());
   //use this for formatting
-  this.dateString = Utilities.formatDate(this.startTimestamp, 'America/New_York', 'MMMM dd, yyyy');
+  this.dateString = Utilities.formatDate(this.startTimestamp, Session.getScriptTimeZone(), 'MMMM dd, yyyy');
   //this.timeString = this.startTimestamp.toLocaleTimeString();
   // fix endtime
   var eventTimeEnd = calendarSheetName.getRange(row, 6).getValue(); // eventTimeEnd(F)
