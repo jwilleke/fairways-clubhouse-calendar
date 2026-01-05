@@ -38,8 +38,9 @@ function testARow() {
  * On form submission triggers this function
  * I think this is all we need to do.
  */
-function rowAddedFromForm() {
-  const row = calendarSheetName.getLastRow();
+function rowAddedFromForm(e) {
+  // Use the event object if available (triggered by form submit), otherwise use the last row (manual run)
+  const row = e ? e.range.getRow() : calendarSheetName.getLastRow();
   //createEventFromRow(row);
   // create a request object
   var request = new Submission(row);
@@ -57,7 +58,7 @@ function rowAddedFromForm() {
       Logger.log(`Emails were not sent: SENDMAIL=${SENDMAIL}`);
     }
     Logger.log(`FAILED: ${request.status} the Clubhouse Reservation for: 
-    ${request.eventDescription} starts at: ${Utilities.formatDate(new Date(request.startTimestamp), 'America/Los_Angeles', 'h:mm a')} and ends at: ${Utilities.formatDate(new Date(request.endTimestamp), 'America/Los_Angeles', 'h:mm a')} 
+    ${request.eventDescription} starts at: ${Utilities.formatDate(new Date(request.startTimestamp), Session.getScriptTimeZone(), 'h:mm a')} and ends at: ${Utilities.formatDate(new Date(request.endTimestamp), Session.getScriptTimeZone(), 'h:mm a')} 
     FAILED as The End Time is before the Start Time of the event!`)
     return; // do not call check for conflicts.
   }
@@ -175,7 +176,7 @@ function draftEmail(request) {
       request.header = "Request Received";
       request.header = "Clubhouse Reservation";
       request.message = `Your Clubhouse Reservation for:
-      ${request.eventDescription} starts at: ${Utilities.formatDate(new Date(request.startTimestamp), 'America/Los_Angeles', 'h:mm a')} and ends at: ${Utilities.formatDate(new Date(request.endTimestamp), 'America/Los_Angeles', 'h:mm a')} 
+      ${request.eventDescription} starts at: ${Utilities.formatDate(new Date(request.startTimestamp), Session.getScriptTimeZone(), 'h:mm a')} and ends at: ${Utilities.formatDate(new Date(request.endTimestamp), Session.getScriptTimeZone(), 'h:mm a')} 
       FAILED as The End Time is before the Start Time of the event!
       Please Reschedule!`
       break;
@@ -210,8 +211,8 @@ function draftEmail(request) {
       request.subject = "ERROR: Clubhouse Reservation for " + request.dateString + " FAILED";
       request.header = "Confirmation: Clubhouse Reservation";
       request.message = "Your Clubhouse Reservation for\n"
-        + request.eventDescription + " starts at: " + Utilities.formatDate(new Date(request.startTimestamp), 'America/Los_Angeles', 'h:mm a')
-        + " and ends at: " + Utilities.formatDate(new Date(request.endTimestamp), 'America/Los_Angeles', 'h:mm a');
+        + request.eventDescription + " starts at: " + Utilities.formatDate(new Date(request.startTimestamp), Session.getScriptTimeZone(), 'h:mm a')
+        + " and ends at: " + Utilities.formatDate(new Date(request.endTimestamp), Session.getScriptTimeZone(), 'h:mm a');
       + "\n\n FAILED!"
       // 
       // create email message
