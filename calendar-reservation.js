@@ -72,29 +72,51 @@ function rowAddedFromForm(e) {
  */
 function Submission(row) {
   this.row = row;
+  // always read from the form responses sheet; getActiveSheet() is unreliable in triggers
+  var values = calendarSheetName.getRange(row, 1, 1, 10).getValues()[0];
   // when reservation form was filled out
-  this.timestamp = aSheet.getRange(row, 1).getValue();
+  this.timestamp = values[0];
   // email who filled out form
-  this.email = aSheet.getRange(row, 2).getValue();
+  this.email = values[1];
   // Displayed Description
-  this.eventDisplayed = aSheet.getRange(row, 3).getValue();
+  this.eventDisplayed = values[2];
   // data of event
-  var eventDate = new Date(aSheet.getRange(row, 4).getValue());
+  var eventDate = new Date(values[3]);
   // fix event start
-  var startTime = aSheet.getRange(row, 5).getValue();
-  this.startTimestamp = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate(), startTime.getHours(), startTime.getMinutes());
+  var startTime = toHoursMinutes(values[4], row, "start time (E)");
+  this.startTimestamp = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate(), startTime.hours, startTime.minutes);
   //use this for formatting
   this.dateString = Utilities.formatDate(this.startTimestamp, Session.getScriptTimeZone(), 'MMMM dd, yyyy');
   //this.timeString = this.startTimestamp.toLocaleTimeString();
   // fix endtime
-  var eventTimeEnd = calendarSheetName.getRange(row, 6).getValue(); // eventTimeEnd(F)
-  this.endTimestamp = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate(), eventTimeEnd.getHours(), eventTimeEnd.getMinutes());
+  var eventTimeEnd = toHoursMinutes(values[5], row, "end time (F)");
+  this.endTimestamp = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate(), eventTimeEnd.hours, eventTimeEnd.minutes);
   // Displayed Description
-  this.eventDescription = aSheet.getRange(row, 7).getValue();
+  this.eventDescription = values[6];
   // contact phone
-  this.name = aSheet.getRange(row, 9).getValue();
+  this.name = values[8];
   // contacts name
-  this.name = aSheet.getRange(row, 10).getValue();
+  this.name = values[9];
+}
+
+/**
+ * Converts a time cell value (Date, or text like "2:30 PM" / "14:30") to {hours, minutes}
+ */
+function toHoursMinutes(value, row, label) {
+  if (value instanceof Date) {
+    return { hours: value.getHours(), minutes: value.getMinutes() };
+  }
+  var match = String(value).trim().match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*([AaPp][Mm])?$/);
+  if (!match) {
+    throw new Error(`Row ${row}: cannot parse ${label} value "${value}"`);
+  }
+  var hours = Number(match[1]);
+  var minutes = Number(match[2]);
+  if (match[3]) {
+    var pm = match[3].toUpperCase() === "PM";
+    hours = (hours % 12) + (pm ? 12 : 0);
+  }
+  return { hours: hours, minutes: minutes };
 }
 
 // Check for conflicting events
