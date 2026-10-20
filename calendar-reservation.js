@@ -94,7 +94,7 @@ function Submission(row) {
   // Displayed Description
   this.eventDescription = values[6];
   // contact phone
-  this.name = values[8];
+  this.phone = values[8];
   // contacts name
   this.name = values[9];
 }
